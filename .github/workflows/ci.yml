@@ -1,0 +1,54 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Build Docker image
+      run: docker build -t 3o3 .
+
+    - name: Run
+      env:
+        MAIN_URL: ${{ secrets.MAIN_URL }}
+        LOGIN_ID: ${{ secrets.ID }}
+        LOGIN_PW: ${{ secrets.PASSWORD }}
+        CI: "true"
+      run: docker run --rm 3o3\
+          -e MAIN_URL=$MAIN_URL \
+          -e ID=$LOGIN_ID \
+          -e PASSWORD=$LOGIN_PW \
+          -e CI=$CI \
+          -v ${{ github.workspace }}/allure-results:/app/allure-results \
+        
+
+
+    - name: Get Allure
+      uses: actions/checkout@v3
+      if: always()
+      continue-on-error: true
+      with:
+        ref: gh-pages
+        path: gh-pages
+
+    - name: Allure Report action
+      uses: simple-elf/allure-report-action@master
+      if: always()
+      with:
+        allure_results: allure-results
+        allure_history: allure-history
+        keep_reports: 20
+
+    - name: Deploy report to Github Pages
+      if: always()
+      uses: peaceiris/actions-gh-pages@v3
+      with:
+        publish_branch: gh-pages
+        publish_dir: allure-history
