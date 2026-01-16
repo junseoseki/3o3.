@@ -21,4 +21,27 @@ def page():
         page.goto(os.getenv("MAIN_URL"))
         yield page
         browser.close()
+
+@pytest.hookimpl(tryfirst=True, hookwrapper=True)
+def pytest_runtest_makereport(item, call):
+    """
+    테스트 실패 시 스크린샷 자동 캡처 Hook
+    """
+    outcome = yield
+    rep = outcome.get_result()
+    
+    # fixture에서 'page' 객체를 사용하는 테스트가 실패했을 때
+    if rep.when == "call" and rep.failed:
+        page = item.funcargs.get("page")
+        if page:
+            import allure
+            try:
+                # 스크린샷 찍어서 Allure에 첨부
+                allure.attach(
+                    page.screenshot(full_page=True),
+                    name=f"failed_screenshot_{item.name}",
+                    attachment_type=allure.attachment_type.PNG
+                )
+            except Exception as e:
+                print(f"스크린샷 저장 실패: {e}")
    
