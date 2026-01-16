@@ -8,4 +8,5 @@ class basepage:
     def _get_locator(self, locator: str) -> Locator:
         return self.page.locator(locator)
     
-    
+    def _wait_for_load_state(self):
+        self.page.wait_for_load_state("networkidle")
