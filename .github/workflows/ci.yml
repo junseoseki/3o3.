@@ -20,6 +20,9 @@ jobs:
       run: |
         echo "${{ secrets.DOT_ENV_FILE }}" > .env
 
+    - name: Make allure-results directory
+      run: mkdir -p allure-results
+
     - name: Build Docker image
       run: docker build -t 3o3 .
 
