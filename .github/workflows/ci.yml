@@ -21,13 +21,14 @@ jobs:
         LOGIN_ID: ${{ secrets.ID }}
         LOGIN_PW: ${{ secrets.PASSWORD }}
         CI: "true"
-      run: docker run --rm 3o3\
+      run: |
+        docker run --rm \
           -e MAIN_URL=$MAIN_URL \
           -e ID=$LOGIN_ID \
           -e PASSWORD=$LOGIN_PW \
           -e CI=$CI \
           -v ${{ github.workspace }}/allure-results:/app/allure-results \
-        
+          3o3
 
 
     - name: Get Allure
@@ -50,5 +51,6 @@ jobs:
       if: always()
       uses: peaceiris/actions-gh-pages@v3
       with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
         publish_branch: gh-pages
         publish_dir: allure-history
