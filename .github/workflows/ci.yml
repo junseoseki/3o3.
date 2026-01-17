@@ -32,6 +32,10 @@ jobs:
           -e CI="true" \
           -v ${{ github.workspace }}/allure-results:/app/allure-results \
           3o3 
+
+    - name: Fix permissions
+      if: always()
+      run: sudo chown -R $USER:$USER allure-results
       
     - name: Allure Report action
       uses: simple-elf/allure-report-action@master
