@@ -25,5 +25,11 @@ class loginpage(basepage):
             logging.info("로그인 성공: 메인 도메인 진입 확인")
         except Exception as e:
             curr_url = self.page.url
-            logging.error(f"로그인 후 리다이렉트 실패. 현재 URL: {curr_url}")
-            raise Exception(f"Login Verification Failed: Stucked at {curr_url}") from e
+            try:
+                # Capture visible text to diagnose (e.g. Captcha, "Protective Measure", "Invalid Password")
+                body_text = self.page.locator("body").inner_text()[:1000].replace('\n', ' ')
+            except:
+                body_text = "Could not capture body text"
+            
+            logging.error(f"로그인 후 리다이렉트 실패. URL: {curr_url}, Text: {body_text}")
+            raise Exception(f"Login Verification Failed. URL: {curr_url}, Content: {body_text}") from e

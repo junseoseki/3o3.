@@ -13,10 +13,17 @@ def page():
         is_docker = os.path.exists("/.dockerenv")
         
         if is_ci or is_docker:
-            # Add anti-detection args
+            # Add anti-detection args and Docker stability args
             browser = p.chromium.launch(
                 headless=True,
-                args=["--disable-blink-features=AutomationControlled"]
+                args=[
+                    "--disable-blink-features=AutomationControlled",
+                    "--no-sandbox",
+                    "--disable-setuid-sandbox",
+                    "--disable-dev-shm-usage",
+                    "--disable-accelerated-2d-canvas",
+                    "--disable-gpu"
+                ]
             )
         else:
             browser = p.chromium.launch(headless=False, channel="chrome")
