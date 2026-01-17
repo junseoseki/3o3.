@@ -11,6 +11,14 @@ class loginpage(basepage):
         super().__init__(page, timeout)
     
     def try_login(self):
+        # Check if already logged in (Session Reuse)
+        try:
+            self.page.wait_for_url("**/app.3o3.co.kr/**", timeout=3000)
+            logging.info("Already logged in (Session Reused). Skipping login steps.")
+            return
+        except:
+            pass # Not logged in, proceed with login flow
+
         self._get_locator(login_locator.kakao_login_button).click()
         self._get_locator(login_locator.id_input).fill(os.getenv("ID"))
         self._get_locator(login_locator.password_input).fill(os.getenv("PASSWORD"))

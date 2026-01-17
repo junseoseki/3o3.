@@ -28,10 +28,15 @@ def page():
         else:
             browser = p.chromium.launch(headless=False, channel="chrome")
         
+        # Helper to load state if exists
+        state_path = ".auth/state.json"
+        storage_state = state_path if os.path.exists(state_path) else None
+        
         context = browser.new_context(
             user_agent="Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
             locale="ko-KR",
-            viewport={"width": 1920, "height": 1080}
+            viewport={"width": 1920, "height": 1080},
+            storage_state=storage_state
         )
         
         # Hide the webdriver property
