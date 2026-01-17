@@ -29,7 +29,7 @@ def browser_type_launch_args(browser_type_launch_args):
         **browser_type_launch_args,
         "args": args,
         "headless": True if os.getenv("CI") == "true" else False,
-        "channel": "chrome", # Try to use actual Chrome if available
+        # "channel": "chrome", # Removed to use bundled Chromium which is safer in CI
     }
 
     if proxy_server:
