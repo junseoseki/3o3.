@@ -2,46 +2,35 @@ import pytest
 import os
 from playwright.sync_api import sync_playwright
 from dotenv import load_dotenv
+from src.page.loginpage import loginpage
 
 load_dotenv()
 
 @pytest.fixture(scope="session")
-def page():
-    with sync_playwright() as p:
-        # CI 환경이거나 Docker 컨테이너 내부인 경우 헤드리스 모드 및 내장 Chromium 사용
-        is_ci = os.getenv("CI") == "true"
-        is_docker = os.path.exists("/.dockerenv")
-        
-        if is_ci or is_docker:
-            browser = p.chromium.launch(headless=True)
-        else:
-            browser = p.chromium.launch(headless=False, channel="chrome")
-        context = browser.new_context()
-        page = context.new_page()
-        page.goto(os.getenv("MAIN_URL"))
-        yield page
-        browser.close()
-
-@pytest.hookimpl(tryfirst=True, hookwrapper=True)
-def pytest_runtest_makereport(item, call):
+def auth_state(tmp_path_factory):
     """
-    테스트 실패 시 스크린샷 자동 캡처 Hook
+    외부에서 생성된 auth.json 파일의 경로를 반환합니다.
+    이 파일은 generate_auth.py를 통해 미리 생성되어 있어야 합니다.
     """
-    outcome = yield
-    rep = outcome.get_result()
+    state_file = "auth.json"
     
-    # fixture에서 'page' 객체를 사용하는 테스트가 실패했을 때
-    if rep.when == "call" and rep.failed:
-        page = item.funcargs.get("page")
-        if page:
-            import allure
-            try:
-                # 스크린샷 찍어서 Allure에 첨부
-                allure.attach(
-                    page.screenshot(full_page=True),
-                    name=f"failed_screenshot_{item.name}",
-                    attachment_type=allure.attachment_type.PNG
-                )
-            except Exception as e:
-                print(f"스크린샷 저장 실패: {e}")
+    # 파일 존재 확인 (선택 사항)
+    if not os.path.exists(state_file):
+        # CI에서는 파일이 없을 때 경고하거나 에러를 낼 수 있음
+        # 하지만 pytest-playwright는 파일이 없으면 그냥 무시하고 빈 상태로 시작할 수도 있음
+        # 여기서는 명시적으로 에러를 내지 않고 경로만 반환 (없으면 로그인 안된 상태로 테스트 실패할 것임)
+        print(f"경고: {state_file} 파일이 없습니다. 비로그인 상태로 테스트가 진행될 수 있습니다.")
+        
+    return state_file
+
+@pytest.fixture(scope="session")
+def browser_context_args(auth_state):
+    """
+    모든 테스트가 위에서 생성된 auth.json 상태를 로드하여 시작하도록 설정합니다.
+    """
+    return {
+        "storage_state": auth_state,
+        "base_url": os.getenv("MAIN_URL") # 이렇게 하면 test에서 page.goto("/")로 이동 가능
+    }
+
    
