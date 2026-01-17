@@ -1,11 +1,13 @@
 import pytest
 import os
-from playwright.sync_api import sync_playwright
+from playwright.sync_api import Page
+from playwright_stealth import Stealth
 from dotenv import load_dotenv
 from src.page.loginpage import loginpage
 
 load_dotenv()
 
+# 1. Configure Browser Launch (Headless, Proxy, Anti-bot args)
 @pytest.fixture(scope="session")
 def auth_state(tmp_path_factory):
     """
