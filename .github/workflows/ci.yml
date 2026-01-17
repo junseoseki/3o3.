@@ -45,6 +45,10 @@ jobs:
         allure_history: allure-history
         keep_reports: 20
 
+    - name: Disable Jekyll
+      if: always()
+      run: touch allure-history/.nojekyll
+
     - name: Deploy report to Github Pages
       if: always()
       uses: peaceiris/actions-gh-pages@v3
