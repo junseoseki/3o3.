@@ -47,7 +47,12 @@ jobs:
 
     - name: Disable Jekyll
       if: always()
-      run: sudo touch allure-history/.nojekyll
+      run: touch allure-history/.nojekyll
+
+    - name: Copy latest to root
+      if: always()
+      run: |
+        cp -r allure-history/latest/* allure-history/
 
     - name: Deploy report to Github Pages
       if: always()
