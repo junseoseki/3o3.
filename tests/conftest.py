@@ -19,7 +19,7 @@ def auto_visit_base_url(page):
 
 # 실패 시 스크린샷을 Allure 리포트에 첨부하는 Hook
 @pytest.hookimpl(tryfirst=True, hookwrapper=True)
-def make_screenshot_on_failure(item, call):
+def pytest_runtest_makereport(item, call):
     outcome = yield
     rep = outcome.get_result()
     
