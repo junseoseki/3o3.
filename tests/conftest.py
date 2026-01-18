@@ -16,6 +16,8 @@ def browser_context_args():
 @pytest.fixture(autouse=True)
 def auto_visit_base_url(page):
     page.goto("/")
+    yield
+    page.close()    
 
 # 실패 시 스크린샷을 Allure 리포트에 첨부하는 Hook
 @pytest.hookimpl(tryfirst=True, hookwrapper=True)
