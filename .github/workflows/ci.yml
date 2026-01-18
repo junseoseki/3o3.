@@ -58,3 +58,29 @@ jobs:
         github_token: ${{ secrets.GITHUB_TOKEN }}
         publish_branch: gh-pages
         publish_dir: allure-history
+
+    - name: Slack Notify - Success
+      if: success()
+      run: |
+        curl -X POST -H 'Content-type: application/json' \
+        --data "{
+          \"text\": \":white_check_mark: *CI 테스트 성공!*\\n
+          *Repo:* ${{ github.repository }}\\n
+          *Branch:* ${{ github.ref_name }}\\n
+          *Commit:* <https://github.com/${{ github.repository }}/commit/${{ github.sha }}|${{ github.sha }}>\\n
+          *Allure Report:* https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/\"
+        }" \
+        ${{ secrets.SLACK_WEBHOOK_URL }}
+
+    - name: Slack Notify - Failure
+      if: failure()
+      run: |
+        curl -X POST -H 'Content-type: application/json' \
+        --data "{
+          \"text\": \":x: *CI 테스트 실패!*\\n
+          *Repo:* ${{ github.repository }}\\n
+          *Branch:* ${{ github.ref_name }}\\n
+          *Commit:* <https://github.com/${{ github.repository }}/commit/${{ github.sha }}|${{ github.sha }}>\\n
+          *Check Run:* <${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}|View Run>\"
+        }" \
+        ${{ secrets.SLACK_WEBHOOK_URL }}
